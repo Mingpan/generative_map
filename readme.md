@@ -1,7 +1,7 @@
 
 ## Introduction
 This is the code base for our work of Generative Map at <https://arxiv.org/abs/1902.11124>.  
-It is an effort to combine generative model (in particular, [Variational Auto-Encoders](https://arxiv.org/abs/1312.6114)) and the classic Kalman filter for generation with localization. Generative Map enables:
+It is an effort to combine generative model (in particular, [Variational Auto-Encoders](https://arxiv.org/abs/1312.6114)) and the classic Kalman filter for generation with localization.  
 For more details, please refer to [our paper on arXiv](https://arxiv.org/abs/1902.11124).
 
 ## Dependencies
