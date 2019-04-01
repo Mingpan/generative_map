@@ -16,7 +16,7 @@ def main():
                         help='size of the training set, sampled from the given sequences')
     parser.add_argument('--dim_observation', type=int, default=128,
                         help='dimension of the latent representation ("observation")')
-    parser.add_argument('--batch_size', type=int, default=80,
+    parser.add_argument('--batch_size', type=int, default=64,
                         help='mini-batch size for training')
     parser.add_argument('--num_epochs', type=int, default=5000,
                         help='number of epochs for training')
@@ -26,7 +26,7 @@ def main():
                         help='directory to save current model to')
     parser.add_argument('--data_dir', type=str, default='data/7scenes/chess',
                         help='directory to load the dataset')
-    parser.add_argument('--reconstruct_accuracy', type=float, default=0.,
+    parser.add_argument('--reconstruct_accuracy', type=float, default=-3.,
                         help='how accurate should the reconstruction be, float, negative and positive, '
                         'the smaller the more accurate')
     parser.add_argument('--dim_input', nargs=3, default=[96, 96, 3],

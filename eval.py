@@ -27,10 +27,10 @@ def main():
     parser.add_argument('--visualize_dir', type=str, default='visualize',
                         help='directory to save the visualization output + video (if apply)')
     parser.add_argument('--video', default=False, action='store_true',
-                        help='if a video should be recorded comparing real, reconstructed, and estimated '
-                             'reconstructed images, only available for image reconstruction model')
+                        help='if a video should be recorded comparing real and estimated '
+                             'reconstructed images, together with localization results')
     parser.add_argument('--no_model', default=False, action='store_true',
-                        help='if the true state transition will be provided to enhance the accuracy')
+                        help='if the true state transition will be hidden to test localization based only on images.')
     parser.add_argument('--generation_mode', type=int, default=1,
                         help='0: equidistant sample image generation; 1: Kalman filter estimation for localization; '
                              '2: perform both')
