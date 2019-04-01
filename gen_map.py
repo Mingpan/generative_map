@@ -8,7 +8,6 @@ from ops import loss_rec_normal, loss_reg_normal, loss_kl_normal
 
 
 class GenMap(object):
-    """Joint Conditional Variational Autoencoder"""
     def __init__(self, arch_encoder_attribute, image_size, dim_features=512, num_conv_layer=4,
                  transfer_fct=tf.nn.relu, learning_rate=1e-3, batch_size=100, rec_log_var=0.,
                  training=False, reconstruct_size=(64, 64, 3)):
@@ -26,8 +25,6 @@ class GenMap(object):
         self.y = tf.placeholder(tf.float32, y_shape, name="image_input")
         self.y_small = tf.placeholder(tf.float32, [None, self.reconstruction_dim], name="image_reconstruct")
 
-        # for VAE, internal representation has 2x params
-        # for JCVAE, we have two encoders, and a single decoder for y
         arch_encoder_x = arch_encoder_attribute.copy()
         arch_encoder_x[-1] = arch_encoder_x[-1] * 2
         z_x_all = build_fnn(self.x, arch_encoder_x, transfer_fct, scope="encoder_x")
