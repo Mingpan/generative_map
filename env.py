@@ -11,11 +11,13 @@ class MobileRobot:
     """
     Simulate a sequence as a mobile robot.
     """
-    def __init__(self, times, time2rgb, dim_control, time2pos=None, no_model=False, norm_xyz=1., norm_q=1.):
+    def __init__(self, times, time2rgb, dim_control, time2pos=None, time2vopos=None,
+                 no_model=False, norm_xyz=1., norm_q=1.):
         self.timestamps = times
         self.time2rgb = time2rgb
         self.dim_control = dim_control
         self.time2pos = time2pos
+        self.time2vopos = time2vopos if time2vopos is not None else self.time2pos
         self.no_model = no_model
         self.norm_xyz = norm_xyz
         self.norm_q = norm_q
@@ -60,9 +62,9 @@ class MobileRobot:
         dt = new_time - self.time
 
         new_pos = self.time2pos[new_time]
-        vel = (new_pos[:3] - self.pos[:3]) / dt
-        qt = self.pos[3:]
-        qt_1 = new_pos[3:]
+        vel = (self.time2vopos[new_time][:3] - self.time2vopos[self.time][:3]) / dt
+        qt = self.time2vopos[self.time][3:]
+        qt_1 = self.time2vopos[new_time][3:]
         # for quaternion, time is not considered
         q = quaternion_multiply(qt_1, quaternion_inverse(qt))
         # combine

@@ -4,8 +4,8 @@ import time
 import json
 import argparse
 
-from data_loader_7scenes import DataLoader
-# from data_loader_robotcar import DataLoader
+from data_loader_7scenes import DataLoader as DataLoader7Scenes
+from data_loader_robotcar import DataLoader as DataLoaderRobotCar
 
 from model import Model
 
@@ -35,6 +35,8 @@ def main():
                         help='the height, width, and number of channel for reconstructed image, separated by space')
     parser.add_argument('--learning_rate', type=float, default=0.0001,
                         help='learning rate')
+    parser.add_argument('--use_robotcar', default=False, action='store_true',
+                        help='if the robotcar data loader will be used, since it is stored in a different format.')
     # # TODO reload&train is not implemented yet, as it was never really needed
     # parser.add_argument('--load_model', type=str, default=None,
     #                     help='Reload a model checkpoint and restore training.')
@@ -53,11 +55,12 @@ def train(args):
     json_path = os.path.join(args.model_dir, "model_specs.json")
 
     # get the dataset / simulated system
+    DataLoader = DataLoaderRobotCar if args.use_robotcar else DataLoader7Scenes
     dataloader = DataLoader(args.data_dir, img_width=args.dim_input[1], img_height=args.dim_input[0])
 
     # save the training flags
     args_dict = vars(args)
-    args_dict['scaling_factor'] = [dataloader.norm_factor_xyz, dataloader.norm_factor_q]
+    args_dict['scaling_factor'] = [dataloader.norm_xyz, dataloader.norm_q]
     with open(json_path, 'w') as outfile:
         json.dump(args_dict, outfile, indent=4)
     

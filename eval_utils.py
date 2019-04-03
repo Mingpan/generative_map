@@ -46,13 +46,16 @@ class VideoRecorder:
         fig = plt.figure(figsize=(12, 6))
         plt.subplots_adjust(wspace=-0.2)
 
-        ax = fig.add_subplot(self.gs[:2, :2], projection='3d')
-        ax.plot(self.traj_true[0, :], self.traj_true[1, :], self.traj_true[2, :], '--b', label='true')
-        ax.plot(self.traj_est[0, :], self.traj_est[1, :], self.traj_est[2, :], '-r', label='estimate')
+        ax = fig.add_subplot(self.gs[:2, :2])
+        ax.plot(self.traj_true[0, :], self.traj_true[1, :], '--b', label='true')
+        ax.plot(self.traj_est[0, :], self.traj_est[1, :], '-r', label='estimate')
+        ax.scatter(self.traj_true[0, -1], self.traj_true[1, -1], c='b', s=20)
+        ax.scatter(self.traj_est[0, -1], self.traj_est[1, -1], c='r', s=20)
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
-        ax.set_zlabel("z [m]")
         ax.tick_params(pad=-0.5)
+        ax.set_xlim([-200, 200])
+        ax.set_ylim([-250, 200])
         ax.legend()
 
         ax = fig.add_subplot(self.gs[0, 2])
@@ -109,8 +112,11 @@ def rotational_error(true, pred):
     return np.mean(error) / np.pi * 180, np.median(error) / np.pi * 180
 
 
-def plot_result(x_est, x_true=None, save_dir=None):
+def plot_result(x_est, x_true=None, save_dir=None, use_robotcar=False):
     """Plot the output trajectories, estimate the error if possible. """
+    if use_robotcar:
+        x_est[:, 2:-1, 0] = 0.
+
     f, axarr = plt.subplots(2, sharex='all', figsize=(12, 12))
     for p in range(2):
         start_idx = p * 3
@@ -124,7 +130,10 @@ def plot_result(x_est, x_true=None, save_dir=None):
     if x_true is not None:
         mu_xyz, median_xyz = translational_error(x_true, x_est)
         mu_rot, median_rot = rotational_error(x_true, x_est)
-        axarr[0].set_title("Extended Kalman Filter Error: est = %.3fm, %.3fdeg" % (median_xyz, median_rot))
+        if not use_robotcar:
+            axarr[0].set_title("Extended Kalman Filter Error: est = %.3fm, %.3fdeg" % (median_xyz, median_rot))
+        else:
+            axarr[0].set_title("Extended Kalman Filter Error (mean): est = %.3fm, %.3fdeg" % (mu_xyz, mu_rot))
     else:
         axarr[0].set_title("Extended Kalman Filter Result")
 
@@ -133,7 +142,7 @@ def plot_result(x_est, x_true=None, save_dir=None):
         plt.savefig(path)
 
 
-def equidistant_generate(system, model, num_sample=10, model_traj=None, save_path=None):
+def equidistant_generate(system, model, num_sample=10, model_traj=None, save_path=None, use_robotcar=False):
     # get system trajectory
     horizon = system.horizon
     model_traj = model_traj[:horizon, ...] if model_traj is not None else None
@@ -152,7 +161,7 @@ def equidistant_generate(system, model, num_sample=10, model_traj=None, save_pat
 
     for i in plotting_steps:
         if model_traj is not None:
-            pos = model_traj[i]
+            pos = model_traj[i].copy()
             pos[:3, :] /= system.norm_xyz
             pos[3:, :] /= system.norm_q
         else:
@@ -185,27 +194,42 @@ def equidistant_generate(system, model, num_sample=10, model_traj=None, save_pat
             plt.close(fig)
 
     fig = plt.figure(figsize=(6, 6))
-    ax = fig.gca(projection='3d')
-    traj[:, :3, :] *= system.norm_xyz
-    traj[:, 3:, :] *= system.norm_q
-    ax.plot(traj[:, 0, 0], traj[:, 1, 0], traj[:, 2, 0], '--b')
-    if model_traj is not None:
-        ax.plot(model_traj[:, 0, 0], model_traj[:, 1, 0], model_traj[:, 2, 0], '-r')
-    for i in plotting_steps:
-        ax.scatter(xs=traj[i, 0, 0], ys=traj[i, 1, 0], zs=traj[i, 2, 0], c='b', s=20)
-        ax.text(traj[i, 0, 0], traj[i, 1, 0], traj[i, 2, 0], str(i), color='black')
+    if not use_robotcar:
+        ax = fig.gca(projection='3d')
+        traj[:, :3, :] *= system.norm_xyz
+        traj[:, 3:, :] *= system.norm_q
+        ax.plot(traj[:, 0, 0], traj[:, 1, 0], traj[:, 2, 0], '--b')
         if model_traj is not None:
-            ax.scatter(xs=model_traj[i, 0, 0], ys=model_traj[i, 1, 0], zs=model_traj[i, 2, 0], c='r', s=20)
-            ax.text(model_traj[i, 0, 0], model_traj[i, 1, 0], model_traj[i, 2, 0], str(i), color='magenta')
+            ax.plot(model_traj[:, 0, 0], model_traj[:, 1, 0], model_traj[:, 2, 0], '-r')
+        for i in plotting_steps[:-1]:
+            ax.scatter(traj[i, 0, 0], traj[i, 1, 0], traj[i, 2, 0], c='b', s=20)
+            if model_traj is not None:
+                ax.scatter(model_traj[i, 0, 0], model_traj[i, 1, 0], model_traj[i, 2, 0], c='r', s=20)
+        ax.set_xlabel('x[m]')
+        ax.set_ylabel('y[m]')
+        ax.set_zlabel('z[m]')
+        ax.tick_params(pad=-0.5)
+    else:
+        ax = fig.gca()
+        traj[:, :3, 0] *= system.norm_xyz
+        traj[:, 3:, 0] *= system.norm_q
+        ax.plot(traj[:, 0, 0], traj[:, 1, 0], '--b')
+        if model_traj is not None:
+            ax.plot(model_traj[:, 0, 0], model_traj[:, 1, 0], '-r')
+        for i in plotting_steps[:-1]:
+            ax.scatter(traj[i, 0, 0], traj[i, 1, 0], c='b', s=20)
+            if model_traj is not None:
+                ax.scatter(model_traj[i, 0, 0], model_traj[i, 1, 0], c='r', s=20)
 
-    ax.set_xlabel('x[m]')
-    ax.set_ylabel('y[m]')
-    ax.set_zlabel('z[m]')
-    ax.tick_params(pad=-0.5)
+        ax.set_xlabel('x[m]')
+        ax.set_ylabel('y[m]')
+        ax.tick_params(pad=-0.5)
+        ax.set_xlim([-200, 200])
+        ax.set_ylim([-250, 200])
 
     if save_path is not None:
         path = os.path.join(save_path, "trajectory")
-        plt.savefig(path, bbox_inches='tight', transparent=True)
+        plt.savefig(path, bbox_inches='tight')
     plt.close(fig)
 
     # joint figure

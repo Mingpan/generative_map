@@ -67,9 +67,9 @@ class DataLoader:
         self.times_train = [t for sublist in self.train_sequences for t in sublist]
 
         if norm_factor is None:
-            self.norm_factor_xyz, self.norm_factor_q = self.variance_norm()
+            self.norm_xyz, self.norm_q = self.variance_norm()
         else:
-            self.norm_factor_xyz, self.norm_factor_q = norm_factor
+            self.norm_xyz, self.norm_q = norm_factor
         
         self.valid_sequences = []
         for path in self.valid_dir:
@@ -167,8 +167,8 @@ class DataLoader:
 
         # normalize
         labels = np.array(labels)
-        labels[:, :3] /= self.norm_factor_xyz
-        labels[:, 3:] /= self.norm_factor_q
+        labels[:, :3] /= self.norm_xyz
+        labels[:, 3:] /= self.norm_q
 
         return np.array(inputs), labels
 
@@ -184,7 +184,7 @@ class DataLoader:
             idx = np.random.randint(len(self.valid_sequences))
         time_seq = self.valid_sequences[idx].copy()
         seq = MobileRobot(time_seq, self.time2rgb, self.dim_control, self.time2pos,
-                          no_model=self.no_model, norm_xyz=self.norm_factor_xyz, norm_q=self.norm_factor_q)
+                          no_model=self.no_model, norm_xyz=self.norm_xyz, norm_q=self.norm_q)
         return seq
 
     def get_test_seq(self, idx=None):

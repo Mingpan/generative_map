@@ -8,8 +8,8 @@ import numpy as np
 
 from tqdm import tqdm
 
-from data_loader_7scenes import DataLoader
-# from data_loader_robotcar import DataLoader
+from data_loader_7scenes import DataLoader as DataLoader7Scenes
+from data_loader_robotcar import DataLoader as DataLoaderRobotCar
 
 from model import Model
 from utils import finite_diff, predict, correct
@@ -188,6 +188,7 @@ def evaluate(eval_args):
     model.restore(model_dir)
 
     # get the dataset / simulated system
+    DataLoader = DataLoaderRobotCar if train_args.use_robotcar else DataLoader7Scenes
     dataloader = DataLoader(train_args.data_dir, no_model=eval_args.no_model,
                             img_width=train_args.dim_input[1], img_height=train_args.dim_input[0],
                             norm_factor=train_args.scaling_factor)
@@ -196,17 +197,24 @@ def evaluate(eval_args):
         sequence = dataloader.get_valid_seq(eval_args.seq_idx)
 
         if eval_args.generation_mode == 0:
-            equidistant_generate(sequence, model, save_path=eval_args.visualize_dir)
+            equidistant_generate(sequence, model,
+                                 save_path=eval_args.visualize_dir,
+                                 use_robotcar=train_args.use_robotcar)
         else:
             video_dir = eval_args.visualize_dir if eval_args.video else None
             x_est, cov_est, x_true, ob = ekf_estimate(sequence, model, eval_args.state_var,
                                                       save_video_dir=video_dir,
                                                       deviation=eval_args.deviation)
 
-            plot_result(x_est, x_true, save_dir=eval_args.visualize_dir)
+            plot_result(x_est, x_true,
+                        save_dir=eval_args.visualize_dir,
+                        use_robotcar=train_args.use_robotcar)
 
             if eval_args.generation_mode > 1:
-                equidistant_generate(sequence, model, model_traj=x_est, save_path=eval_args.visualize_dir)
+                equidistant_generate(sequence, model,
+                                     model_traj=x_est,
+                                     save_path=eval_args.visualize_dir,
+                                     use_robotcar=train_args.use_robotcar)
     else:
         x_est_all, x_true_all, x_pred_all = [], [], []
         for i in range(len(dataloader.valid_sequences)):
