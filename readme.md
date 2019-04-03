@@ -12,9 +12,10 @@ pip install numpy scikit-image tqdm tensorflow==1.13.1
 
 2. Datasets:  
   * 7-Scenes: Download from [their website](https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/).  
+  * RobotCar: Register & Download from [here](https://robotcar-dataset.robots.ox.ac.uk/).  
 
 ## Usage
-For training, one example use can be found below. The `PATH_TO_DATA_DIR` points to the folder where you can find `TrainSplit.txt`, `TestSplit.txt`, and folders of `seq-xx`.  
+For training, one example use can be found below. The `PATH_TO_DATA_DIR` points to the data folder, for example in 7-Scenes it is the folder where you can find `TrainSplit.txt`, `TestSplit.txt`, and folders of `seq-xx`.  
 ```
 python train.py --data_dir <PATH_TO_DATA_DIR>
 ```
@@ -33,7 +34,7 @@ usage: train.py [-h] [--training_size TRAINING_SIZE]
                 [--reconstruct_accuracy RECONSTRUCT_ACCURACY]
                 [--dim_input DIM_INPUT DIM_INPUT DIM_INPUT]
                 [--dim_reconstruct DIM_RECONSTRUCT DIM_RECONSTRUCT DIM_RECONSTRUCT]
-                [--learning_rate LEARNING_RATE]
+                [--learning_rate LEARNING_RATE] [--use_robotcar]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -62,6 +63,8 @@ optional arguments:
                         reconstructed image, separated by space
   --learning_rate LEARNING_RATE
                         learning rate
+  --use_robotcar        if the robotcar data loader will be used, since it is
+                        stored in a different format.
 ```
   
 ```
