@@ -12,7 +12,7 @@ pip install numpy scikit-image tqdm tensorflow==1.13.1
 
 2. Datasets:  
   * 7-Scenes: Download from [their website](https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/).  
-  * RobotCar: Register & Download from [here](https://robotcar-dataset.robots.ox.ac.uk/).  
+  * RobotCar: Register & Download from [here](https://robotcar-dataset.robots.ox.ac.uk/). Remark: we adopt the [preprocessing toolkit from the RobotCar authors](https://github.com/ori-mrg/robotcar-dataset-sdk) and generate data first in `.pkl` format, then load it with `data_loader_robotcar.py`. 
 
 ## Usage
 For training, one example use can be found below. The `PATH_TO_DATA_DIR` points to the data folder, for example in 7-Scenes it is the folder where you can find `TrainSplit.txt`, `TestSplit.txt`, and folders of `seq-xx`.  
